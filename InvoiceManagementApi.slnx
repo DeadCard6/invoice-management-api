@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/Api/">
+    <Project Path="InvoiceManagementApi/InvoiceManagementApi.csproj" />
+  </Folder>
+  <Folder Name="/Core/">
+    <Project Path="InvoiceManagementApi.Application/InvoiceManagementApi.Application.csproj" />
+    <Project Path="InvoiceManagementApi.Domain/InvoiceManagementApi.Domain.csproj" />
+  </Folder>
+  <Folder Name="/Infrastructure/">
+    <Project Path="InvoiceManagementApi.Authentication/InvoiceManagementApi.Authentication.csproj" />
+    <Project Path="InvoiceManagementApi.Infrastructure/InvoiceManagementApi.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="InvoiceManagementApi.Tests/InvoiceManagementApi.Tests.csproj" />
+</Solution>

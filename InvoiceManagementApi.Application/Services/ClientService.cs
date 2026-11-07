@@ -1,0 +1,113 @@
+using InvoiceManagementApi.Application.DTOs.Requests.Clients;
+using InvoiceManagementApi.Application.DTOs.Responses.Clients;
+using InvoiceManagementApi.Application.Interfaces;
+using InvoiceManagementApi.Domain.Entities;
+using InvoiceManagementApi.Domain.Exceptions;
+using InvoiceManagementApi.Domain.Interfaces;
+
+namespace InvoiceManagementApi.Application.Services;
+
+public class ClientService : IClientService
+{
+    private readonly IClientRepository _clientRepository;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public ClientService(IClientRepository clientRepository, IUnitOfWork unitOfWork)
+    {
+        _clientRepository = clientRepository;
+        _unitOfWork = unitOfWork;
+    }
+
+    public async Task<int> CreateAsync(CreateClientRequest request)
+    {
+        var client = new Client
+        {
+            DocumentType = request.DocumentType,
+            DocumentNumber = request.DocumentNumber,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            Email = request.Email,
+            Phone = request.Phone,
+            Address = request.Address,
+            RegistrationDate = DateTime.UtcNow,
+            IsActive = true
+        };
+
+        await _clientRepository.AddAsync(client);
+        await _unitOfWork.SaveChangesAsync();
+        return client.Id;
+    }
+
+    public async Task DeleteAsync(int id)
+    {
+        var client = await _clientRepository.GetByIdAsync(id);
+        if (client == null) throw new NotFoundException(nameof(Client), id);
+        
+        client.IsActive = false;
+        _clientRepository.Update(client);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task ReactivateAsync(int id)
+    {
+        var client = await _clientRepository.GetByIdAsync(id);
+        if (client == null) throw new NotFoundException(nameof(Client), id);
+        
+        client.IsActive = true;
+        _clientRepository.Update(client);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task<IEnumerable<ClientResponse>> GetAllAsync(bool? isActive)
+    {
+        var clients = await _clientRepository.GetAllAsync(isActive);
+        return clients.Select(c => new ClientResponse
+        {
+            Id = c.Id,
+            DocumentType = c.DocumentType,
+            DocumentNumber = c.DocumentNumber,
+            FirstName = c.FirstName,
+            LastName = c.LastName,
+            Email = c.Email,
+            Phone = c.Phone,
+            Address = c.Address,
+            IsActive = c.IsActive
+        });
+    }
+
+    public async Task<ClientResponse> GetByIdAsync(int id)
+    {
+        var c = await _clientRepository.GetByIdAsync(id);
+        if (c == null) throw new NotFoundException(nameof(Client), id);
+        return new ClientResponse
+        {
+            Id = c.Id,
+            DocumentType = c.DocumentType,
+            DocumentNumber = c.DocumentNumber,
+            FirstName = c.FirstName,
+            LastName = c.LastName,
+            Email = c.Email,
+            Phone = c.Phone,
+            Address = c.Address,
+            IsActive = c.IsActive
+        };
+    }
+
+    public async Task UpdateAsync(int id, CreateClientRequest request)
+    {
+        var client = await _clientRepository.GetByIdAsync(id);
+        if (client == null) throw new NotFoundException(nameof(Client), id);
+
+        client.DocumentType = request.DocumentType;
+        client.DocumentNumber = request.DocumentNumber;
+        client.FirstName = request.FirstName;
+        client.LastName = request.LastName;
+        client.Email = request.Email;
+        client.Phone = request.Phone;
+        client.Address = request.Address;
+
+        _clientRepository.Update(client);
+        await _unitOfWork.SaveChangesAsync();
+    }
+}
+
